@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Flashcards - Learn English</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            transition: background 0.3s;
+        }
+
+        body.dark-mode {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+
+        body.dark-mode .stat-box {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        body.dark-mode .card-front {
+            background: linear-gradient(135deg, #2d2d44 0%, #1a1a2e 100%);
+            color: white;
+        }
+
+        body.dark-mode .card-back {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        body.dark-mode .quiz-option {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        body.dark-mode .quiz-option:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        body.dark-mode .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        body.dark-mode .btn-primary:hover {
+            background: #764ba2;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid white;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 1.5em;
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-toggle:hover {
+            background: white;
+            transform: scale(1.1);
+        }
+
+        body.dark-mode .theme-toggle {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .stat-box {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 15px 30px;
+            border-radius: 15px;
+            color: white;
+            text-align: center;
+            min-width: 120px;
+        }
+
+        .stat-box .number {
+            font-size: 2em;
+            font-weight: bold;
+            display: block;
+        }
+
+        .stat-box .label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .card-container {
+            perspective: 1000px;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto 30px;
+            height: 350px;
+        }
+
+        .quiz-container {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto 30px;
+        }
+
+        .spelling-container {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto 30px;
+        }
+
+        .card {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+            cursor: pointer;
+        }
+
+        .card.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            background: white;
+        }
+
+        .card-front {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+
+        .card-back {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transform: rotateY(180deg);
+            color: white;
+        }
+
+        .card-word {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .card-back .card-word {
+            color: white;
+        }
+
+        .card-hint {
+            font-size: 1em;
+            opacity: 0.7;
+            margin-bottom: 10px;
+        }
+
+        .card-example {
+            font-size: 1.1em;
+            font-style: italic;
+            text-align: center;
+            margin-top: 20px;
+            line-height: 1.5;
+        }
+
+        .card-number {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 0.9em;
+            opacity: 0.6;
+        }
+
+        .speak-btn {
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            background: rgba(102, 126, 234, 0.9);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .card.flipped .speak-btn {
+            display: none !important;
+        }
+
+        .speak-btn:hover {
+            background: rgba(102, 126, 234, 1);
+            transform: scale(1.1);
+        }
+
+        .speak-btn:active {
+            transform: scale(0.95);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            font-size: 1em;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary {
+            background: white;
+            color: #667eea;
+        }
+
+        .btn-success {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #f44336;
+            color: white;
+        }
+
+        .btn-warning {
+            background: #ff9800;
+            color: white;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .progress-bar {
+            width: 100%;
+            max-width: 500px;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            margin: 0 auto 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: white;
+            transition: width 0.3s;
+            border-radius: 5px;
+        }
+
+        .mode-selector {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .mode-btn {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .mode-btn:hover {
+            background: white;
+            color: #667eea;
+        }
+
+        .mode-btn.active {
+            background: white;
+            color: #667eea;
+        }
+
+        .quiz-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .quiz-word-display {
+            position: relative;
+            margin: 0 auto 20px;
+            max-width: 500px;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            text-align: center;
+        }
+
+        body.dark-mode .quiz-word-display {
+            background: linear-gradient(135deg, #2d2d44 0%, #1a1a2e 100%);
+            color: white;
+        }
+
+        .quiz-option {
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid transparent;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1em;
+            text-align: center;
+        }
+
+        .quiz-option:hover {
+            background: white;
+            transform: scale(1.02);
+        }
+
+        .quiz-option.correct {
+            background: #4CAF50;
+            color: white;
+            border-color: #4CAF50;
+        }
+
+        .quiz-option.incorrect {
+            background: #f44336;
+            color: white;
+            border-color: #f44336;
+        }
+
+        .quiz-option.disabled {
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        .message {
+            text-align: center;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 600;
+            display: none;
+        }
+
+        .message.show {
+            display: block;
+        }
+
+        .message.success {
+            background: rgba(76, 175, 80, 0.9);
+            color: white;
+        }
+
+        .message.error {
+            background: rgba(244, 67, 54, 0.9);
+            color: white;
+        }
+
+        .message.info {
+            background: rgba(255, 255, 255, 0.9);
+            color: #667eea;
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .card-container {
+                height: 300px;
+            }
+
+            .card-word {
+                font-size: 2em;
+            }
+
+            .card-example {
+                font-size: 0.9em;
+            }
+
+            .stats {
+                gap: 10px;
+            }
+
+            .stat-box {
+                padding: 10px 15px;
+                min-width: 80px;
+            }
+
+            .stat-box .number {
+                font-size: 1.5em;
+            }
+
+            .stat-box .label {
+                font-size: 0.8em;
+            }
+
+            .quiz-options {
+                grid-template-columns: 1fr;
+            }
+
+            .controls {
+                gap: 10px;
+            }
+
+            .btn {
+                padding: 10px 20px;
+                font-size: 0.9em;
+            }
+
+            .mode-selector {
+                gap: 8px;
+            }
+
+            .mode-btn {
+                padding: 8px 16px;
+                font-size: 0.9em;
+            }
+
+            .speak-btn {
+                width: 35px;
+                height: 35px;
+                font-size: 1em;
+            }
+
+            .theme-toggle {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2em;
+                top: 10px;
+                right: 10px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            h1 {
+                font-size: 1.5em;
+            }
+
+            .card-word {
+                font-size: 1.5em;
+            }
+
+            .card-example {
+                font-size: 0.8em;
+            }
+
+            .btn {
+                padding: 8px 16px;
+                font-size: 0.85em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+    
+    <div class="container">
+        <h1>📚 English Flashcards</h1>
+
+        <div class="mode-selector">
+            <button class="mode-btn active" onclick="setMode('flashcard')">Flashcards</button>
+            <button class="mode-btn" onclick="setMode('quiz')">Quiz</button>
+            <button class="mode-btn" onclick="setMode('spelling')">Spelling</button>
+            <button class="mode-btn" onclick="setMode('repeat')">Repeat Mistakes</button>
+        </div>
+
+        <div class="stats">
+            <div class="stat-box">
+                <span class="number" id="totalCards">0</span>
+                <span class="label">Total Cards</span>
+            </div>
+            <div class="stat-box">
+                <span class="number" id="currentCard">0</span>
+                <span class="label">Current</span>
+            </div>
+            <div class="stat-box">
+                <span class="number" id="correctAnswers">0</span>
+                <span class="label">Correct</span>
+            </div>
+            <div class="stat-box">
+                <span class="number" id="incorrectAnswers">0</span>
+                <span class="label">Incorrect</span>
+            </div>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <div class="message" id="message"></div>
+
+        <div class="card-container" id="cardContainer">
+            <div class="card" id="card" onclick="flipCard()">
+                <div class="card-face card-front">
+                    <button class="speak-btn" onclick="event.stopPropagation(); speakWord()">🔊</button>
+                    <span class="card-number" id="cardNumber">1/10</span>
+                    <div class="card-word" id="frontWord">Hello</div>
+                    <div class="card-hint">Click to flip</div>
+                </div>
+                <div class="card-face card-back">
+                    <span class="card-number" id="cardNumberBack">1/10</span>
+                    <div class="card-word" id="backWord">Привет</div>
+                    <div class="card-example" id="cardExample">Example: Hello, how are you?</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="quizContainer" class="quiz-container" style="display: none;">
+            <div class="quiz-word-display">
+                <button class="speak-btn" onclick="speakWord()">🔊</button>
+                <div class="card-word" id="quizWord">Hello</div>
+                <div class="card-hint">Choose the correct translation</div>
+            </div>
+            <div class="quiz-options" id="quizOptions"></div>
+        </div>
+
+        <div id="spellingContainer" class="spelling-container" style="display: none;">
+            <div class="quiz-word-display">
+                <button class="speak-btn" onclick="speakWord()">🔊</button>
+                <div class="card-word" id="spellingWord">Привет</div>
+                <div class="card-hint">Type the English translation</div>
+            </div>
+            <div id="spellingHint" style="text-align: center; margin-bottom: 15px; font-size: 1.2em; letter-spacing: 5px; color: #667eea; font-weight: bold; display: none;"></div>
+            <input type="text" id="spellingInput" 
+                   style="width: 100%; max-width: 500px; padding: 15px; font-size: 1.2em; border: none; border-radius: 10px; margin: 0 auto 20px; display: block;"
+                   placeholder="Type your answer..."
+                   onkeypress="if(event.key === 'Enter') checkSpelling()">
+            <div style="text-align: center; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                <button class="btn btn-primary" onclick="checkSpelling()">Check Answer</button>
+                <button class="btn btn-warning" onclick="showSpellingHint()">💡 Show Hint</button>
+            </div>
+        </div>
+
+        <div class="controls" id="flashcardControls">
+            <button class="btn btn-primary" onclick="previousCard()">← Previous</button>
+            <button class="btn btn-success" onclick="markCorrect()">✓ Correct</button>
+            <button class="btn btn-danger" onclick="markIncorrect()">✗ Incorrect</button>
+            <button class="btn btn-primary" onclick="nextCard()">Next →</button>
+        </div>
+
+        <div class="controls" id="quizControls" style="display: none;">
+            <button class="btn btn-primary" onclick="nextQuizQuestion()">Next Question →</button>
+        </div>
+
+        <div class="controls" id="spellingControls" style="display: none;">
+            <button class="btn btn-primary" onclick="nextSpellingQuestion()">Next Word →</button>
+        </div>
+
+        <div class="controls" id="repeatControls" style="display: none;">
+            <button class="btn btn-primary" onclick="previousRepeatCard()">← Previous</button>
+            <button class="btn btn-success" onclick="markRepeatCorrect()">✓ Correct</button>
+            <button class="btn btn-danger" onclick="markRepeatIncorrect()">✗ Incorrect</button>
+            <button class="btn btn-primary" onclick="nextRepeatCard()">Next →</button>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px;">
+            <button class="btn btn-warning" onclick="resetProgress()">🔄 Reset Progress</button>
+            <button class="btn btn-primary" onclick="shuffleCards()">🔀 Shuffle Cards</button>
+        </div>
+    </div>
+
+    <script>
+        // Flashcard data
+        const flashcards = [
+            {
+                english: "Hello",
+                russian: "Привет",
+                example: "Hello, how are you?"
+            },
+            {
+                english: "Goodbye",
+                russian: "До свидания",
+                example: "Goodbye, see you tomorrow!"
+            },
+            {
+                english: "Thank you",
+                russian: "Спасибо",
+                example: "Thank you for your help."
+            },
+            {
+                english: "Please",
+                russian: "Пожалуйста",
+                example: "Please, come in."
+            },
+            {
+                english: "Sorry",
+                russian: "Извините",
+                example: "Sorry, I didn't mean to."
+            },
+            {
+                english: "Yes",
+                russian: "Да",
+                example: "Yes, I agree with you."
+            },
+            {
+                english: "No",
+                russian: "Нет",
+                example: "No, I don't want to go."
+            },
+            {
+                english: "Good morning",
+                russian: "Доброе утро",
+                example: "Good morning! Did you sleep well?"
+            },
+            {
+                english: "Good night",
+                russian: "Доброй ночи",
+                example: "Good night, sweet dreams!"
+            },
+            {
+                english: "How are you?",
+                russian: "Как дела?",
+                example: "How are you doing today?"
+            },
+            {
+                english: "I'm fine",
+                russian: "Я в порядке",
+                example: "I'm fine, thank you."
+            },
+            {
+                english: "What's your name?",
+                russian: "Как тебя зовут?",
+                example: "What's your name, by the way?"
+            },
+            {
+                english: "My name is...",
+                russian: "Меня зовут...",
+                example: "My name is John."
+            },
+            {
+                english: "Nice to meet you",
+                russian: "Приятно познакомиться",
+                example: "Nice to meet you too!"
+            },
+            {
+                english: "See you later",
+                russian: "Увидимся позже",
+                example: "See you later at the party."
+            },
+            {
+                english: "Excuse me",
+                russian: "Извините",
+                example: "Excuse me, where is the bathroom?"
+            },
+            {
+                english: "I don't understand",
+                russian: "Я не понимаю",
+                example: "I don't understand what you mean."
+            },
+            {
+                english: "Can you help me?",
+                russian: "Можете помочь мне?",
+                example: "Can you help me with this?"
+            },
+            {
+                english: "Of course",
+                russian: "Конечно",
+                example: "Of course, I'd be happy to help."
+            },
+            {
+                english: "You're welcome",
+                russian: "Пожалуйста",
+                example: "You're welcome, anytime!"
+            }
+        ];
+
+        // State
+        let currentIndex = 0;
+        let correctCount = 0;
+        let incorrectCount = 0;
+        let currentMode = 'flashcard';
+        let quizAnswered = false;
+        let spellingAnswered = false;
+        let isDarkMode = false;
+        let mistakes = new Set(); // Track cards with mistakes
+        let repeatModeCards = []; // Cards for repeat mistakes mode
+
+        // Initialize
+        function init() {
+            updateStats();
+            updateCard();
+            updateProgress();
+        }
+
+        // Update statistics display
+        function updateStats() {
+            document.getElementById('totalCards').textContent = flashcards.length;
+            document.getElementById('currentCard').textContent = currentIndex + 1;
+            document.getElementById('correctAnswers').textContent = correctCount;
+            document.getElementById('incorrectAnswers').textContent = incorrectCount;
+        }
+
+        // Update progress bar
+        function updateProgress() {
+            const progress = ((currentIndex + 1) / flashcards.length) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+        }
+
+        // Update card display
+        function updateCard() {
+            const card = flashcards[currentIndex];
+            document.getElementById('frontWord').textContent = card.english;
+            document.getElementById('backWord').textContent = card.russian;
+            document.getElementById('cardExample').textContent = `Example: ${card.example}`;
+            document.getElementById('cardNumber').textContent = `${currentIndex + 1}/${flashcards.length}`;
+            document.getElementById('cardNumberBack').textContent = `${currentIndex + 1}/${flashcards.length}`;
+            
+            // Reset card flip
+            document.getElementById('card').classList.remove('flipped');
+        }
+
+        // Speak the current word
+        function speakWord() {
+            let card;
+            
+            // Get the correct card based on current mode
+            if (currentMode === 'repeat' && repeatModeCards.length > 0) {
+                card = repeatModeCards[currentIndex];
+            } else {
+                card = flashcards[currentIndex];
+            }
+            
+            const utterance = new SpeechSynthesisUtterance(card.english);
+            utterance.lang = 'en-US';
+            utterance.rate = 0.9;
+            utterance.pitch = 1;
+            
+            // Try to get an English voice
+            const voices = speechSynthesis.getVoices();
+            const englishVoice = voices.find(voice => voice.lang.startsWith('en'));
+            if (englishVoice) {
+                utterance.voice = englishVoice;
+            }
+            
+            speechSynthesis.speak(utterance);
+        }
+
+        // Load voices when they become available
+        speechSynthesis.onvoiceschanged = function() {
+            speechSynthesis.getVoices();
+        };
+
+        // Toggle theme
+        function toggleTheme() {
+            isDarkMode = !isDarkMode;
+            document.body.classList.toggle('dark-mode');
+            const toggleBtn = document.querySelector('.theme-toggle');
+            toggleBtn.textContent = isDarkMode ? '☀️' : '🌙';
+        }
+
+        // Check for saved theme preference
+        if (localStorage.getItem('darkMode') === 'true') {
+            toggleTheme();
+        }
+
+        // Save theme preference
+        function saveTheme() {
+            localStorage.setItem('darkMode', isDarkMode);
+        }
+
+        // Override toggleTheme to save preference
+        const originalToggleTheme = toggleTheme;
+        toggleTheme = function() {
+            originalToggleTheme();
+            saveTheme();
+        };
+
+        // Flip card
+        function flipCard() {
+            if (currentMode === 'flashcard' || currentMode === 'repeat') {
+                document.getElementById('card').classList.toggle('flipped');
+            }
+        }
+
+        // Navigate cards
+        function previousCard() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                updateStats();
+                updateCard();
+                updateProgress();
+            }
+        }
+
+        function nextCard() {
+            if (currentIndex < flashcards.length - 1) {
+                currentIndex++;
+                updateStats();
+                updateCard();
+                updateProgress();
+            } else {
+                showMessage('You\'ve reached the end! 🎉', 'success');
+            }
+        }
+
+        // Mark answers
+        function markCorrect() {
+            correctCount++;
+            updateStats();
+            showMessage('Correct! ✓', 'success');
+            setTimeout(() => {
+                hideMessage();
+                if (currentIndex < flashcards.length - 1) {
+                    nextCard();
+                }
+            }, 1000);
+        }
+
+        function markIncorrect() {
+            incorrectCount++;
+            mistakes.add(currentIndex); // Track mistake
+            updateStats();
+            showMessage('Keep practicing! ✗', 'error');
+            setTimeout(() => {
+                hideMessage();
+            }, 1000);
+        }
+
+        // Set mode
+        function setMode(mode) {
+            currentMode = mode;
+            hideMessage(); // Clear any existing messages
+            
+            // Update mode buttons
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Show/hide containers
+            document.getElementById('cardContainer').style.display = (mode === 'flashcard' || mode === 'repeat') ? 'block' : 'none';
+            document.getElementById('quizContainer').style.display = mode === 'quiz' ? 'block' : 'none';
+            document.getElementById('spellingContainer').style.display = mode === 'spelling' ? 'block' : 'none';
+            
+            // Show/hide controls
+            document.getElementById('flashcardControls').style.display = mode === 'flashcard' ? 'flex' : 'none';
+            document.getElementById('quizControls').style.display = mode === 'quiz' ? 'flex' : 'none';
+            document.getElementById('spellingControls').style.display = mode === 'spelling' ? 'flex' : 'none';
+            document.getElementById('repeatControls').style.display = mode === 'repeat' ? 'flex' : 'none';
+            
+            // Initialize mode
+            if (mode === 'quiz') {
+                initQuiz();
+            } else if (mode === 'spelling') {
+                initSpelling();
+            } else if (mode === 'repeat') {
+                initRepeatMode();
+            }
+        }
+
+        // Quiz mode
+        function initQuiz() {
+            quizAnswered = false;
+            const card = flashcards[currentIndex];
+            document.getElementById('quizWord').textContent = card.english;
+            
+            // Generate options
+            const options = generateQuizOptions(card);
+            const optionsContainer = document.getElementById('quizOptions');
+            optionsContainer.innerHTML = '';
+            
+            options.forEach(option => {
+                const btn = document.createElement('div');
+                btn.className = 'quiz-option';
+                btn.textContent = option.russian;
+                btn.onclick = () => checkQuizAnswer(option, btn);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function generateQuizOptions(correctCard) {
+            const options = [correctCard];
+            const otherCards = flashcards.filter(c => c.english !== correctCard.english);
+            
+            // Shuffle and pick 3 random options
+            const shuffled = otherCards.sort(() => Math.random() - 0.5);
+            options.push(...shuffled.slice(0, 3));
+            
+            // Shuffle all options
+            return options.sort(() => Math.random() - 0.5);
+        }
+
+        function checkQuizAnswer(selectedOption, button) {
+            if (quizAnswered) return;
+            quizAnswered = true;
+            
+            const correctCard = flashcards[currentIndex];
+            const allOptions = document.querySelectorAll('.quiz-option');
+            
+            allOptions.forEach(opt => opt.classList.add('disabled'));
+            
+            if (selectedOption.english === correctCard.english) {
+                button.classList.add('correct');
+                correctCount++;
+                showMessage('Correct! ✓', 'success');
+            } else {
+                button.classList.add('incorrect');
+                incorrectCount++;
+                mistakes.add(currentIndex); // Track mistake
+                showMessage(`Incorrect! The answer was: ${correctCard.russian}`, 'error');
+                
+                // Highlight correct answer
+                allOptions.forEach(opt => {
+                    if (opt.textContent === correctCard.russian) {
+                        opt.classList.add('correct');
+                    }
+                });
+            }
+            
+            updateStats();
+        }
+
+        function nextQuizQuestion() {
+            hideMessage();
+            if (currentIndex < flashcards.length - 1) {
+                currentIndex++;
+                updateStats();
+                updateProgress();
+                initQuiz();
+            } else {
+                showMessage('Quiz completed! 🎉', 'success');
+            }
+        }
+
+        // Spelling mode
+        function initSpelling() {
+            spellingAnswered = false;
+            const card = flashcards[currentIndex];
+            document.getElementById('spellingWord').textContent = card.russian;
+            document.getElementById('spellingInput').value = '';
+            document.getElementById('spellingHint').style.display = 'none';
+            document.getElementById('spellingInput').focus();
+        }
+
+        function showSpellingHint() {
+            const card = flashcards[currentIndex];
+            const wordLength = card.english.length;
+            const hint = '_ '.repeat(wordLength).trim();
+            document.getElementById('spellingHint').textContent = hint;
+            document.getElementById('spellingHint').style.display = 'block';
+        }
+
+        function checkSpelling() {
+            if (spellingAnswered) return;
+            
+            const input = document.getElementById('spellingInput').value.trim().toLowerCase();
+            const correctCard = flashcards[currentIndex];
+            const correctAnswer = correctCard.english.toLowerCase();
+            
+            spellingAnswered = true;
+            
+            if (input === correctAnswer) {
+                correctCount++;
+                showMessage('Correct! ✓', 'success');
+            } else {
+                incorrectCount++;
+                mistakes.add(currentIndex); // Track mistake
+                showMessage(`Incorrect! The answer was: ${correctCard.english}`, 'error');
+            }
+            
+            updateStats();
+        }
+
+        function nextSpellingQuestion() {
+            hideMessage();
+            if (currentIndex < flashcards.length - 1) {
+                currentIndex++;
+                updateStats();
+                updateProgress();
+                initSpelling();
+            } else {
+                showMessage('Spelling practice completed! 🎉', 'success');
+            }
+        }
+
+        // Utility functions
+        function showMessage(text, type) {
+            const message = document.getElementById('message');
+            message.textContent = text;
+            message.className = `message show ${type}`;
+        }
+
+        function hideMessage() {
+            const message = document.getElementById('message');
+            message.classList.remove('show');
+        }
+
+        // Repeat mistakes mode
+        function initRepeatMode() {
+            if (mistakes.size === 0) {
+                showMessage('No mistakes to repeat! Great job! 🎉', 'success');
+                repeatModeCards = [];
+                document.getElementById('cardContainer').style.display = 'none';
+                return;
+            }
+            
+            // Create array of cards with mistakes
+            repeatModeCards = Array.from(mistakes).map(index => ({
+                ...flashcards[index],
+                originalIndex: index
+            }));
+            
+            currentIndex = 0;
+            updateRepeatCard();
+        }
+
+        function updateRepeatCard() {
+            if (repeatModeCards.length === 0) {
+                showMessage('All mistakes cleared! 🎉', 'success');
+                return;
+            }
+            
+            const card = repeatModeCards[currentIndex];
+            document.getElementById('frontWord').textContent = card.english;
+            document.getElementById('backWord').textContent = card.russian;
+            document.getElementById('cardExample').textContent = `Example: ${card.example}`;
+            document.getElementById('cardNumber').textContent = `${currentIndex + 1}/${repeatModeCards.length}`;
+            document.getElementById('cardNumberBack').textContent = `${currentIndex + 1}/${repeatModeCards.length}`;
+            
+            // Reset card flip
+            document.getElementById('card').classList.remove('flipped');
+            
+            // Update progress
+            const progress = ((currentIndex + 1) / repeatModeCards.length) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+        }
+
+        function previousRepeatCard() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                updateRepeatCard();
+            }
+        }
+
+        function nextRepeatCard() {
+            if (currentIndex < repeatModeCards.length - 1) {
+                currentIndex++;
+                updateRepeatCard();
+            } else {
+                showMessage('All mistakes reviewed! 🎉', 'success');
+            }
+        }
+
+        function markRepeatCorrect() {
+            correctCount++;
+            // Remove from mistakes
+            const card = repeatModeCards[currentIndex];
+            mistakes.delete(card.originalIndex);
+            
+            // Remove from repeat mode cards
+            repeatModeCards.splice(currentIndex, 1);
+            
+            if (repeatModeCards.length === 0) {
+                updateStats();
+                showMessage('All mistakes cleared! 🎉', 'success');
+                document.getElementById('cardContainer').style.display = 'none';
+            } else if (currentIndex >= repeatModeCards.length) {
+                currentIndex = repeatModeCards.length - 1;
+                updateRepeatCard();
+                updateStats();
+            } else {
+                updateRepeatCard();
+                updateStats();
+            }
+        }
+
+        function markRepeatIncorrect() {
+            incorrectCount++;
+            updateStats();
+            showMessage('Keep practicing! ✗', 'error');
+            setTimeout(() => {
+                hideMessage();
+            }, 1000);
+        }
+
+        function resetProgress() {
+            currentIndex = 0;
+            correctCount = 0;
+            incorrectCount = 0;
+            mistakes.clear();
+            repeatModeCards = [];
+            updateStats();
+            updateCard();
+            updateProgress();
+            hideMessage();
+            
+            if (currentMode === 'quiz') {
+                initQuiz();
+            } else if (currentMode === 'spelling') {
+                initSpelling();
+            } else if (currentMode === 'repeat') {
+                initRepeatMode();
+            }
+            
+            showMessage('Progress reset!', 'info');
+            setTimeout(hideMessage, 2000);
+        }
+
+        function shuffleCards() {
+            // Fisher-Yates shuffle
+            for (let i = flashcards.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [flashcards[i], flashcards[j]] = [flashcards[j], flashcards[i]];
+            }
+            
+            currentIndex = 0;
+            updateStats();
+            updateCard();
+            updateProgress();
+            
+            if (currentMode === 'quiz') {
+                initQuiz();
+            } else if (currentMode === 'spelling') {
+                initSpelling();
+            }
+            
+            showMessage('Cards shuffled!', 'info');
+            setTimeout(hideMessage, 2000);
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (currentMode === 'flashcard') {
+                if (e.key === 'ArrowLeft') previousCard();
+                if (e.key === 'ArrowRight') nextCard();
+                if (e.key === ' ') {
+                    e.preventDefault();
+                    flipCard();
+                }
+                if (e.key === 'c' || e.key === 'C') markCorrect();
+                if (e.key === 'i' || e.key === 'I') markIncorrect();
+            } else if (currentMode === 'quiz') {
+                // 1-4 to select options
+                if (['1', '2', '3', '4'].includes(e.key)) {
+                    const options = document.querySelectorAll('.quiz-option');
+                    const index = parseInt(e.key) - 1;
+                    if (index < options.length && !quizAnswered) {
+                        options[index].click();
+                    }
+                }
+                // Enter to go to next question
+                if (e.key === 'Enter' && quizAnswered) {
+                    nextQuizQuestion();
+                }
+            } else if (currentMode === 'spelling') {
+                // Enter to check answer or go to next
+                if (e.key === 'Enter') {
+                    if (spellingAnswered) {
+                        nextSpellingQuestion();
+                    }
+                }
+            } else if (currentMode === 'repeat') {
+                if (e.key === 'ArrowLeft') previousRepeatCard();
+                if (e.key === 'ArrowRight') nextRepeatCard();
+                if (e.key === ' ') {
+                    e.preventDefault();
+                    flipCard();
+                }
+                if (e.key === 'c' || e.key === 'C') markRepeatCorrect();
+                if (e.key === 'i' || e.key === 'I') markRepeatIncorrect();
+            }
+        });
+
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>
